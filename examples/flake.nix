@@ -39,7 +39,7 @@
         siteTitle = "AgentSpace Option Search";
         releaseSwitchTitle = "AgentSpace Release";
         config = {
-          baseURL = "https://example.invalid/";
+          baseURL = "https://0xferrous.github.io/option-search.nix/";
           params.footer_copyright_line = "Made with ❤️ by 0xferrous";
         };
       };

@@ -102,14 +102,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1779142623,
-        "narHash": "sha256-17Uvbiq+3+r9o2c3R7/DvrCurvPreRiK10fYxZne7W8=",
-        "path": "/home/dmnt/dev/fr/option-search.nix",
-        "type": "path"
+        "lastModified": 1779142992,
+        "narHash": "sha256-ox7+aF8draoS/grdX4KZA6432SWt7AqK8JW0Goybcp8=",
+        "owner": "0xferrous",
+        "repo": "option-search.nix",
+        "rev": "0dce486750def45985e026c667fec00db5bbae4b",
+        "type": "github"
       },
       "original": {
-        "path": "/home/dmnt/dev/fr/option-search.nix",
-        "type": "path"
+        "owner": "0xferrous",
+        "repo": "option-search.nix",
+        "type": "github"
       }
     },
     "root": {
