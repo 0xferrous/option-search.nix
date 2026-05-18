@@ -1,0 +1,92 @@
+name: Deploy AgentSpace example to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lib/**"
+      - "examples/**"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Use Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Build site
+        env:
+          PAGES_BASE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: |
+          set -euo pipefail
+
+          out="$(nix build --impure --no-link --print-out-paths --expr '
+          let
+            root = builtins.getFlake (toString ./.);
+            pkgs = import root.inputs.nixpkgs { system = "x86_64-linux"; };
+            agentspace = builtins.getFlake "github:shazow/agentspace";
+            mkModuleDocs = root.lib.mkModuleDocs { inherit pkgs; };
+            mkOptionSearchSite = root.lib.mkOptionSearchSite { inherit pkgs; };
+            docs = mkModuleDocs {
+              modules = [
+                agentspace.inputs.microvm.nixosModules.microvm
+                agentspace.inputs.home-manager.nixosModules.home-manager
+                (import "${agentspace.outPath}/sandbox-qemu.nix")
+              ];
+              class = "nixos";
+              title = "AgentSpace Sandbox";
+              subtitle = "Configuration options";
+              variablelistId = "agentspace-options";
+              optionIdPrefix = "opt-";
+              filterOption = path: _:
+                builtins.length path > 0 && builtins.head path == "agentspace";
+            };
+          in
+          mkOptionSearchSite {
+            moduleDocs = docs;
+            releaseName = "agentspace";
+            siteTitle = "AgentSpace Option Search";
+            releaseSwitchTitle = "AgentSpace Release";
+            config = {
+              baseURL = builtins.getEnv "PAGES_BASE_URL";
+              params.footer_copyright_line = "Made with ❤️ by 0xferrous";
+            };
+          }
+          ')"
+
+          mkdir -p public
+          cp -r "$out"/. public/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
