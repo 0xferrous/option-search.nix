@@ -1,11 +1,11 @@
-name: Deploy AgentSpace example to GitHub Pages
+name: Deploy Svelte frontend to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
       - "lib/**"
-      - "examples/**"
+      - "svelte-frontend/**"
       - "flake.nix"
       - "flake.lock"
       - ".github/workflows/pages.yml"
@@ -34,7 +34,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Build site
-        run: nix build ./examples
+        run: nix build .#svelte-frontend-with-data
 
       - name: Prepare publish dir
         run: |
