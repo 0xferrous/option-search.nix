@@ -97,21 +97,21 @@
         "type": "github"
       }
     },
-    "option-search": {
+    "nix-options-search": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1779142992,
         "narHash": "sha256-ox7+aF8draoS/grdX4KZA6432SWt7AqK8JW0Goybcp8=",
-        "owner": "0xferrous",
-        "repo": "option-search.nix",
+        "owner": "nixbld",
+        "repo": "nix-options-search",
         "rev": "0dce486750def45985e026c667fec00db5bbae4b",
         "type": "github"
       },
       "original": {
-        "owner": "0xferrous",
-        "repo": "option-search.nix",
+        "owner": "nixbld",
+        "repo": "nix-options-search",
         "type": "github"
       }
     },
@@ -119,7 +119,7 @@
       "inputs": {
         "agentspace": "agentspace",
         "nixpkgs": "nixpkgs",
-        "option-search": "option-search"
+        "nix-options-search": "nix-options-search"
       }
     },
     "spectrum": {

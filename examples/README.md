@@ -8,8 +8,8 @@ Build the AgentSpace option search site:
 nix build ./examples
 ```
 
-For local repo development, override the option-search input:
+For local repo development, override the nix-options-search input:
 
 ```bash
-nix build ./examples --override-input option-search path:.
+nix build ./examples --override-input nix-options-search path:.
 ```

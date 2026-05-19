@@ -1,4 +1,4 @@
-# option-search.nix
+# nix-options-search
 
 Reusable Nix building blocks for:
 
@@ -11,14 +11,14 @@ Reusable Nix building blocks for:
 
 ```nix
 {
-  inputs.option-search.url = "github:0xferrous/option-search.nix";
+  inputs.nix-options-search.url = "github:nixbld/nix-options-search";
 
-  outputs = { nixpkgs, option-search, ... }:
+  outputs = { nixpkgs, nix-options-search, ... }:
   let
     pkgs = nixpkgs.legacyPackages.x86_64-linux;
-    mkModuleDocs = option-search.lib.mkModuleDocs { inherit pkgs; };
-    mkOptionSearchSite = option-search.lib.mkOptionSearchSite { inherit pkgs; };
-    mkNamespaceFilter = option-search.lib.mkNamespaceFilter;
+    mkModuleDocs = nix-options-search.lib.mkModuleDocs { inherit pkgs; };
+    mkOptionSearchSite = nix-options-search.lib.mkOptionSearchSite { inherit pkgs; };
+    mkNamespaceFilter = nix-options-search.lib.mkNamespaceFilter;
     docs = mkModuleDocs {
       modules = [ ./module.nix ];
       class = "nixos";

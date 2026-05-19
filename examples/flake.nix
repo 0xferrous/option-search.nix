@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    option-search.url = "github:0xferrous/option-search.nix";
+    nix-options-search.url = "github:nixbld/nix-options-search";
     agentspace = {
       url = "github:shazow/agentspace";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -11,12 +11,12 @@
   };
 
   outputs =
-    { nixpkgs, option-search, agentspace, ... }:
+    { nixpkgs, nix-options-search, agentspace, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      mkModuleDocs = option-search.lib.mkModuleDocs { inherit pkgs; };
-      mkOptionSearchSite = option-search.lib.mkOptionSearchSite { inherit pkgs; };
+      mkModuleDocs = nix-options-search.lib.mkModuleDocs { inherit pkgs; };
+      mkOptionSearchSite = nix-options-search.lib.mkOptionSearchSite { inherit pkgs; };
       moduleDocs = mkModuleDocs {
         modules = [
           agentspace.inputs.microvm.nixosModules.microvm
@@ -39,8 +39,8 @@
         siteTitle = "AgentSpace Option Search";
         releaseSwitchTitle = "AgentSpace Release";
         config = {
-          baseURL = "https://0xferrous.github.io/option-search.nix/";
-          params.footer_copyright_line = "Made with ❤️ by 0xferrous";
+          baseURL = "https://nixbld.github.io/nix-options-search/";
+          params.footer_copyright_line = "Made with ❤️ by nixbld";
         };
       };
     };
