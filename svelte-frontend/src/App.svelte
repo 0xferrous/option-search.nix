@@ -19,6 +19,8 @@
   let lastLoadedKey = '';
 
   const keyOf = (source, version) => `${source}::${version}`;
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const dataUrl = (name) => `${baseUrl}data/${name}`;
 
   function applyStateFromUrl() {
     const params = new URLSearchParams(window.location.search);
@@ -46,7 +48,7 @@
   }
 
   async function loadUiConfig() {
-    const res = await fetch('/data/ui-config.json');
+    const res = await fetch(dataUrl('ui-config.json'));
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const cfg = await res.json();
     datasets = cfg.datasets || [];
@@ -70,7 +72,7 @@
     const pairs = await Promise.all(
       datasets.map(async (d) => {
         try {
-          const res = await fetch(`/data/${d.file}`);
+          const res = await fetch(dataUrl(d.file));
           if (!res.ok) return [keyOf(d.source, d.version), 0];
           const data = await res.json();
           return [keyOf(d.source, d.version), (data.options || []).length];
@@ -94,7 +96,7 @@
     error = '';
     expandedTitles = new Set();
     try {
-      const res = await fetch(`/data/${ds.file}`);
+      const res = await fetch(dataUrl(ds.file));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       options = data.options || [];
