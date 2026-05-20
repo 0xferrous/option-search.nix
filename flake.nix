@@ -10,13 +10,17 @@
       url = "github:nix-community/impermanence";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    ethereumNix = {
+      url = "github:nix-community/ethereum.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     agentspace = {
       url = "github:shazow/agentspace";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { nixpkgs, nixpkgs-25_11, home-manager, home-manager-25_11, impermanence, agentspace, ... }:
+  outputs = { nixpkgs, nixpkgs-25_11, home-manager, home-manager-25_11, impermanence, ethereumNix, agentspace, ... }:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -24,6 +28,7 @@
 
       mkModuleDocs = import ./lib/mkModuleDocs.nix;
       mkOptionSearchSite = import ./lib/mkOptionSearchSite.nix;
+      mkNamespaceFilter = import ./lib/mkNamespaceFilter.nix { inherit pkgs; };
       mkSvelteFrontend = import ./lib/mkSvelteFrontend.nix;
       mkOptionsData = import ./lib/mkOptionsData.nix;
       mkMergeOptionsData = import ./lib/mkMergeOptionsData.nix;
@@ -48,21 +53,21 @@
         modules = [ impermanence.nixosModules.impermanence ];
         class = "nixos";
         # Impermanence reuses the NixOS module system, so filter to its own option tree.
-        filterOption = path: _:
-          let
-            prefixes = [
-              [ "environment" "persistence" ]
-              [ "home" "persistence" ]
-            ];
-            matches = prefix:
-              let
-                n = builtins.length prefix;
-                m = builtins.length path;
-              in
-              (n <= m && pkgs.lib.take n path == prefix)
-              || (m < n && pkgs.lib.take m prefix == path);
-          in
-          builtins.any matches prefixes;
+        filterOption = mkNamespaceFilter {
+          includeNamespaces = [
+            [ "environment" "persistence" ]
+            [ "home" "persistence" ]
+          ];
+        };
+      };
+
+      docsEthereumNixUnstable = (mkModuleDocs { inherit pkgs; }) {
+        modules = [ ethereumNix.nixosModules.default ];
+        class = "nixos";
+        # ethereum.nix ships many NixOS modules; keep only the ethereum.* subtree.
+        filterOption = mkNamespaceFilter {
+          includeNamespaces = [ [ "services" "ethereum" ] ];
+        };
       };
 
       docsAgentSpaceUnstable = (mkModuleDocs { inherit pkgs; }) {
@@ -106,6 +111,12 @@
         sourceName = "Impermanence";
       };
 
+      dataEthereumNixUnstable = (mkOptionsData { inherit pkgs; }) {
+        moduleDocs = docsEthereumNixUnstable;
+        releaseName = "unstable";
+        sourceName = "ethereum.nix";
+      };
+
       dataAgentSpaceUnstable = (mkOptionsData { inherit pkgs; }) {
         moduleDocs = docsAgentSpaceUnstable;
         releaseName = "unstable";
@@ -128,6 +139,7 @@
           { source = "Home Manager"; version = "unstable"; path = "${dataHomeManagerUnstable}/options-unstable.json"; }
           { source = "Home Manager"; version = "25.11"; path = "${dataHomeManager25}/options-25.11.json"; }
           { source = "Impermanence"; version = "unstable"; path = "${dataImpermanenceUnstable}/options-unstable.json"; }
+          { source = "ethereum.nix"; version = "unstable"; path = "${dataEthereumNixUnstable}/options-unstable.json"; }
           { source = "AgentSpace"; version = "unstable"; path = "${dataAgentSpaceUnstable}/options-unstable.json"; }
         ];
       };
@@ -141,6 +153,7 @@
           { source = "Home Manager"; version = "unstable"; path = "${dataHomeManagerUnstable}/options-unstable.json"; }
           { source = "Home Manager"; version = "25.11"; path = "${dataHomeManager25}/options-25.11.json"; }
           { source = "Impermanence"; version = "unstable"; path = "${dataImpermanenceUnstable}/options-unstable.json"; }
+          { source = "ethereum.nix"; version = "unstable"; path = "${dataEthereumNixUnstable}/options-unstable.json"; }
           { source = "AgentSpace"; version = "unstable"; path = "${dataAgentSpaceUnstable}/options-unstable.json"; }
         ];
       };
@@ -157,7 +170,7 @@
       lib = {
         mkModuleDocs = mkModuleDocs;
         mkOptionSearchSite = mkOptionSearchSite;
-        mkNamespaceFilter = import ./lib/mkNamespaceFilter.nix { inherit pkgs; };
+        mkNamespaceFilter = mkNamespaceFilter;
         mkSvelteFrontend = mkSvelteFrontend;
         mkOptionsData = mkOptionsData;
         mkMergeOptionsData = mkMergeOptionsData;

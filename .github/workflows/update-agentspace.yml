@@ -28,7 +28,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Update flake inputs
-        run: nix flake lock --update-input agentspace --update-input impermanence
+        run: nix flake lock --update-input agentspace --update-input impermanence --update-input ethereumNix
 
       - name: Detect lockfile changes
         id: changes
