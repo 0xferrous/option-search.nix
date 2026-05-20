@@ -1,0 +1,69 @@
+name: Update AgentSpace input and publish gh-pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-agentspace
+  cancel-in-progress: false
+
+jobs:
+  update-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Use Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Update AgentSpace flake input
+        run: nix flake lock --update-input agentspace
+
+      - name: Detect lockfile changes
+        id: changes
+        run: |
+          if git diff --quiet -- flake.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build site
+        if: steps.changes.outputs.changed == 'true'
+        run: nix build .#svelte-frontend-with-data-pages
+
+      - name: Prepare publish dir
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          rm -rf public
+          mkdir -p public
+          cp -r result/. public/
+
+      - name: Commit and push flake.lock
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flake.lock
+          git commit -m "chore(deps): update agentspace flake input"
+          git push origin HEAD:main
+
+      - name: Publish gh-pages
+        if: steps.changes.outputs.changed == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./public
+          force_orphan: true
